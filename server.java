@@ -34,7 +34,7 @@ public class JavaServerForCppClient
 		createLoop( true );
 	}
 
-	private boolean createServer()
+	private boolean createServer() // initializes the variables
 	{
 		System.out.println( "Creating server.." );
 		try
@@ -62,7 +62,7 @@ public class JavaServerForCppClient
 		}
 	}
 
-	private void createLoop( boolean isRunning )
+	private void createLoop( boolean isRunning ) // creates the loop where the server will receive and send messages
 	{
 		running = isRunning;
 		if( ! running )
@@ -76,14 +76,14 @@ public class JavaServerForCppClient
 		{
 			i++;
 			receiveMessage();
-			if( i >= 10 )
+			if( i >= 10 ) // test example how to disconnect from the client and restart the loop so the next client can connect with no problems with the variables
 			{
 				restartServer();
 			} else
 			{
-				if( ! sendMessage( "1" ) )
+				if( ! sendMessage( "1" ) ) // Checks if the server couldn't send the status message: 1 (Problem with the connection) (Status messages: 0 = Close 1 = OK)
 				{
-					createLoop( running );
+					createLoop( running ); // re-create the loop so a new client can join
 				}
 			}
 		}
@@ -91,11 +91,10 @@ public class JavaServerForCppClient
 		restartServer();
 	}
 
-	private String receiveMessage()
+	private String receiveMessage() // Call this function to wait for an input from the client
 	{
 		ByteBuffer bLength = ByteBuffer.allocate( 4 );
 		bLength.order( ByteOrder.LITTLE_ENDIAN );
-		// Read 4 bytes
 		try
 		{
 			is.read( bLength.array(), 0, 4 );
@@ -107,7 +106,6 @@ public class JavaServerForCppClient
 		// Convert the length
 		int length = bLength.getInt();
 
-		// Allocate ByteBuffer for message
 		ByteBuffer bMessage = ByteBuffer.allocate( length );
 		bMessage.order( ByteOrder.LITTLE_ENDIAN );
 		try
@@ -124,12 +122,11 @@ public class JavaServerForCppClient
 		return msg;
 	}
 
-	private boolean sendMessage( String msg )
+	private boolean sendMessage( String msg ) // Use this function to send a message to the client
 	{
 		ByteBuffer bLengthNew = ByteBuffer.allocate( 4 );
 		bLengthNew.order( ByteOrder.LITTLE_ENDIAN );
 		bLengthNew.putInt( msg.length() );
-
 		try
 		{
 			os.write( bLengthNew.array() );
@@ -142,15 +139,15 @@ public class JavaServerForCppClient
 		return true;
 	}
 
-	private void closeServer()
+	private void closeServer() // Use this function to close the server and to stop the loop
 	{
 		System.out.println( "-------------------------" );
 		System.out.println( "Server closing.." );
-		disconnectClient();
-		running = false;
+		disconnectClient(); // disconnects the client from the server
+		running = false; // <-- closes the loop
 		try
 		{
-			serverSocket.close();
+			serverSocket.close(); // tries to close the server
 		} catch( IOException e )
 		{
 			e.printStackTrace();
@@ -159,13 +156,13 @@ public class JavaServerForCppClient
 		System.out.println( "-------------------------" );
 	}
 
-	private void disconnectClient()
+	private void disconnectClient() // Sends a status message 0 to the client (0 = CLOSE)
 	{
 		sendMessage( "0" );
 		System.out.println( "Client disconnected!" );
 	}
 
-	private void restartServer()
+	private void restartServer() // Close the server, create a new one and create the loop again
 	{
 		System.out.println( "-------------------------" );
 		System.out.println( "Restarting.." );
