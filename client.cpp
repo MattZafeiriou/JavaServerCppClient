@@ -57,6 +57,7 @@ void createClient() {
 		std::cout << "Error - when connecting " << WSAGetLastError() << std::endl;
 		closesocket(u_sock);
 		WSACleanup();
+                return;
 	}
 	std::cout << "Successfully connected to server" << std::endl;
 	//Send some message to remote host
